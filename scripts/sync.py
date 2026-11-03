@@ -16,7 +16,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 BASE = "https://saptabeeja.coffee"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-OUT = os.path.join(ROOT, "data", "catalog.json")
+OUT = os.path.join(ROOT, "public", "data", "catalog.json")
 UA = "coffee-ledger/1.0 (personal catalog sync)"
 WORKERS = 4
 

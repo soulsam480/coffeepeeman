@@ -18,7 +18,7 @@ docs/             design notes
 ## Run
 
 ```sh
-python3 -m http.server 8787
+python3 -m http.server 8787 -d public
 open http://127.0.0.1:8787
 ```
 

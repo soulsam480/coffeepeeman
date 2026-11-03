@@ -1,0 +1,10 @@
+{
+  "name": "coffee-ledger",
+  "private": true,
+  "scripts": {
+    "dev": "npx wrangler dev",
+    "deploy": "npx wrangler deploy",
+    "sync": "python3 scripts/sync.py",
+    "serve": "python3 -m http.server 8787 -d public"
+  }
+}

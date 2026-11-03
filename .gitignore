@@ -1,3 +1,5 @@
 .DS_Store
 .playwright-cli/
+.wrangler/
+node_modules/
 *.tmp
