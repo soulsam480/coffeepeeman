@@ -1,35 +1,43 @@
-# Coffee
+# Coffeepeeman
 
-A personal coffee ledger. The list is public. Adding and rating is private.
+A personal coffee ledger. The list is public; adding and rating is private. It
+suggests what to buy next based on what you actually liked.
 
-Add a bag, score it black and milk, and it suggests the next two — one safe pick,
-one stretch.
+**https://coffeepeeman.sambitsahoo.com**
 
-## How it's built
+## Stack
+
+Cloudflare Worker + D1 + static assets. Alpine.js for the UI, self-hosted. No
+build step, no framework, no bundler.
 
 ```
-public/            static app, no build step
+public/               static app
   index.html
   styles.css
-  js/api.js        fetch calls
-  js/format.js     naming, price, flavour helpers
-  js/recommend.js  scoring (pure functions)
-  js/app.js        DOM and state
+  js/api.js           fetch calls
+  js/app.js           Alpine component
+  js/format.js        naming, price, flavour helpers
+  js/recommend.js     scoring, pure functions
+  js/alpine.min.js    self-hosted Alpine
 
-src/               Cloudflare Worker
-  index.js         routes
-  auth.js          owner token, cookie
-  api.js           D1 queries
-  login.js         login page
+src/                  Worker
+  index.js            routes and security headers
+  auth.js             owner token, session cookie
+  api.js              D1 queries and validation
+  login.js            login page
 
-migrations/        D1 schema and seed
-scripts/sync.py    downloads the catalog into D1
+migrations/           D1 schema and seed
+scripts/sync.py       downloads the catalog into D1
 ```
 
-D1 tables:
+## How it works
 
-- `bags` — what you bought and how you scored it (single source of truth)
-- `catalog` — Saptabeeja's coffees, private, owner-only
+- `GET /api/bags` is public: the list, scores and notes.
+- `/login` takes the owner token and sets an `HttpOnly` session cookie.
+- Adding, rating, and the catalog are owner-only.
+- The catalog lives in D1, not in the deployed assets.
+- Recommendations score catalog coffees against your rated bags on roast,
+  flavour, process and price. Default is 8 picks; the count is selectable.
 
 ## Run locally
 
@@ -37,15 +45,13 @@ D1 tables:
 npx wrangler dev
 ```
 
-Local D1 starts empty. Apply the schema first:
+Local D1 starts empty:
 
 ```sh
 npx wrangler d1 execute coffee-ledger --local --file=migrations/0001_init.sql
 ```
 
 ## Deploy
-
-Live at **https://coffeepeeman.sambitsahoo.com**
 
 ```sh
 npx wrangler deploy
@@ -58,11 +64,11 @@ printf '%s' "$(python3 -c 'import secrets;print(secrets.token_urlsafe(32))')" \
   | npx wrangler secret put OWNER_TOKEN
 ```
 
-The current one is in `.owner-token` locally (gitignored). Log in at `/login`;
-the session is an `HttpOnly` cookie lasting a year. `/logout` clears it.
+The current token is in `.owner-token` locally (gitignored). Log in at `/login`;
+the session lasts a year. `/logout` clears it.
 
-`run_worker_first = true` in `wrangler.toml` is load-bearing — without it,
-Cloudflare serves the static assets directly and the gate is bypassed.
+`run_worker_first = true` in `wrangler.toml` is load-bearing: without it,
+Cloudflare serves the static assets directly and the token gate is bypassed.
 
 ## Sync the catalog
 
@@ -72,45 +78,46 @@ python3 scripts/sync.py
 
 Fetches Saptabeeja's index and per-roaster details, recomputes `per100` from
 price and grams, and replaces the `catalog` table. Needs `npx wrangler login`
-once. Run it whenever you want fresh prices — Monday and Thursday is when
-Saptabeeja refreshes.
+once. Run it when you want fresh prices; Saptabeeja refreshes Monday and
+Thursday.
+
+## Security
+
+- One entry point: `workers.dev` and preview URLs are disabled.
+- Session: `__Host-` cookie, `HttpOnly`, `Secure`, `SameSite=Lax`, one year.
+- Login rejects cross-origin posts; token comparison is constant-time.
+- Writes require the owner cookie, `application/json`, and a body under 16 KB.
+- Scores are validated 1–5; prices and grams must be non-negative numbers.
+- SQL is parameterised; update fields are whitelisted.
+- UI uses `x-text` only (no `x-html`); buy links must be `https:`.
+- CSP, HSTS, COOP, `nosniff`, frame-deny, permissions policy.
+- The catalog API is owner-only; the public sees bags only.
+
+Not done yet: rate limiting on `/login`. The token is 43 random characters, so
+guessing is impractical, but a request flood can still exhaust the Workers free
+quota. Cloudflare Access is the remaining layer.
 
 ## Saptabeeja and licensing
 
 The catalog comes from [Saptabeeja](https://saptabeeja.coffee). The sync reads
-two public files:
+`/data/catalog-index.json` and `/data/details/<roaster>.json`.
 
-```
-/data/catalog-index.json
-/data/details/<roaster>.json
-```
+Their `robots.txt` allows crawling; there is no terms page and no licence. The
+data is a private cache for personal use. No roaster images are copied, every
+pick links out to the roaster, and removal requests are honoured.
 
-**What they allow.** Their `robots.txt` is `User-agent: * / Allow: /` (only SEO
-crawlers are blocked), so automated fetching is not disallowed. Their `/about`
-says the data is read from each roaster's own public product listing, refreshed
-Monday and Thursday, that the roaster's page is the source of truth, and that
-corrections and removal requests are handled.
+Do not expose the catalog as a public API, and do not republish the dataset. For
+anything beyond personal use, ask Saptabeeja first or read each roaster's own
+storefront.
 
-**What they do not grant.** There is no licence and no terms page — `/terms`,
-`/licence`, `/license` and `/privacy` all return 404. `robots.txt` is not a
-licence. There is no explicit permission to redistribute their catalog.
+The code is MIT licensed. The catalog is not covered.
 
-**What this project does about it.**
+## Data model
 
-- The catalog is a private cache, served only to the owner.
-- No roaster images are copied.
-- Every recommendation links out to the roaster to buy.
-- If Saptabeeja or a roaster asks for something to be removed, remove it.
-
-**If you fork this and deploy it publicly:** do not expose the catalog API or
-turn it into an open catalogue. For anything beyond personal use, ask Saptabeeja
-first, or fetch straight from each roaster's storefront.
-
-The code is yours to fork. The catalog is not.
+- `bags` — roaster, coffee, roast, price, grams, date, black score, milk score, note
+- `catalog` — Saptabeeja's coffees: name, roaster, roast, process, flavours, price, buy URL
 
 ## Next
 
-Put Cloudflare Access on the Worker (Workers & Pages → `coffee-ledger` →
-Access), allow only your email, protect preview URLs, and set the route to fail
-closed. Access runs before the Worker, so bot traffic never touches the daily
-request quota.
+Enable Cloudflare Access on the Worker, allow only your email, protect preview
+URLs, and fail closed.

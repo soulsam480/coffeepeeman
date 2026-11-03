@@ -1,5 +1,5 @@
 {
-  "name": "coffee-ledger",
+  "name": "coffeepeeman",
   "private": true,
   "scripts": {
     "dev": "npx wrangler dev",
