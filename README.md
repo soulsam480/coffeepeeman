@@ -25,6 +25,34 @@ open http://127.0.0.1:8787
 Registry lives in `localStorage` under `coffee.registry.v1`. Export downloads it
 as JSON.
 
+## Deploy
+
+Live at **https://coffee-ledger.sambitsahoojs.workers.dev**
+
+```sh
+npx wrangler deploy
+```
+
+The Worker gates every path behind an owner token: `/login`, an `HttpOnly`
+cookie, one-year session. Set or rotate the token with:
+
+```sh
+printf '%s' "$(python3 -c 'import secrets;print(secrets.token_urlsafe(32))')" \
+  | npx wrangler secret put OWNER_TOKEN
+```
+
+The generated token lives in `.owner-token` locally (gitignored). Losing it only
+means setting a new one.
+
+`run_worker_first = true` in `wrangler.toml` is load-bearing. Without it,
+Cloudflare serves the static assets directly and the gate is bypassed.
+
+Recommended next: put Cloudflare Access on the Worker (Workers & Pages →
+`coffee-ledger` → Access), allow only your email, protect preview URLs, and set
+the route to fail closed. Access runs before the Worker, so bot traffic never
+touches the daily request quota.
+
+
 ## Sync the catalog
 
 ```sh
