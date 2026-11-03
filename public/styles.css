@@ -71,6 +71,13 @@ h1 {
   font: inherit;
   font-size: 13px;
   cursor: pointer;
+  text-decoration: none;
+}
+
+.head-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 
 .tabs {

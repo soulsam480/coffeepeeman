@@ -1,0 +1,15 @@
+INSERT INTO bags (roaster, name, roast, price, grams, date, black, milk, note, created_at) VALUES
+('Kruti Coffee', 'Koraput Arabica Blend', 'medium', 550, 250, '2026-01-15', 4, 4, 'chocolate, easy daily', '2026-01-15T00:00:00Z'),
+('Blue Tokai', '13th Birthday Blend', 'medium', 650, 250, '2026-01-21', NULL, NULL, '', '2026-01-21T00:00:00Z'),
+('Dancing Goat', 'DG Microlot #1', NULL, 500, 250, '2026-02-02', NULL, NULL, '', '2026-02-02T00:00:00Z'),
+('Dancing Goat', 'Ratnagiri Estate', 'medium', 550, 250, '2026-03-26', 5, 4, 'the one I keep reordering', '2026-03-26T00:00:00Z'),
+('Half Light Coffee', 'Tripura Hills', NULL, 670, 250, '2026-04-01', 4, 4, '', '2026-04-01T00:00:00Z'),
+('Riverside Coffee', 'Skia Estate, Nelaji', 'medium', 500, 250, '2026-04-18', NULL, NULL, '', '2026-04-18T00:00:00Z'),
+('Savorworks', 'Riverdale, Medium to Dark', 'medium-dark', 630, 250, '2026-05-30', 4, 5, 'raisin, toffee, hazelnut', '2026-05-30T00:00:00Z'),
+('Odd Coffee Roasters', 'Breakfast Blend, Light Roast', 'light', 549, 250, '2026-05-30', NULL, NULL, '', '2026-05-30T00:00:00Z'),
+('Riverside Coffee', 'Mad Monkey Medium', 'medium', 540, 250, '2026-06-09', NULL, NULL, '', '2026-06-09T00:00:00Z'),
+('Fraction 9', 'Everyday Gold', 'medium', 435, 250, '2026-08-10', 4, 4, 'milk chocolate, toasted almond', '2026-08-10T00:00:00Z'),
+('Dancing Goat', 'Ratnagiri Estate', 'medium', 550, 250, '2026-08-10', 5, 4, 'reordered', '2026-08-10T00:00:00Z'),
+('Tiny Tiger Coffee', 'Caramel Espresso', 'medium-dark', 590, 250, '2026-09-08', 4, 4, 'caramel', '2026-09-08T00:00:00Z'),
+('Sip Magic', 'Mysore Nuggets Bold', 'medium-dark', 599, 250, '2026-10-05', 5, 4, 'toffee, low bitterness', '2026-10-05T00:00:00Z'),
+('Sip Magic', 'Monsoon Melody', 'medium', 599, 250, '2026-10-05', 3, 3, 'monsooned arabica', '2026-10-05T00:00:00Z');

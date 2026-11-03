@@ -16,20 +16,31 @@
         <h1>Coffee</h1>
         <p class="count" id="count"></p>
       </div>
-      <button class="ghost" id="exportBtn" type="button">Export</button>
+      <div class="head-actions">
+        <button class="ghost" id="exportBtn" type="button" hidden>
+          Export
+        </button>
+        <a class="ghost" id="authLink" href="/login">Sign in</a>
+      </div>
     </header>
 
     <nav class="tabs" role="tablist">
       <button role="tab" data-view="ledger" aria-selected="true">Ledger</button>
-      <button role="tab" data-view="add" aria-selected="false">Add</button>
-      <button role="tab" data-view="next" aria-selected="false">Next</button>
+      <button role="tab" data-view="add" aria-selected="false" hidden>
+        Add
+      </button>
+      <button role="tab" data-view="next" aria-selected="false" hidden>
+        Next
+      </button>
     </nav>
 
     <main>
       <section id="view-ledger">
         <ul class="bags" id="bagList"></ul>
-        <p class="empty" id="ledgerEmpty" hidden>
-          Nothing here yet. Add the bag you're drinking now.
+        <p class="empty" id="ledgerEmpty" hidden>Nothing here yet.</p>
+        <p class="fine" id="publicNote" hidden>
+          The list is public. <a href="/login">Sign in</a> to add a bag or rate
+          one.
         </p>
       </section>
 
@@ -132,6 +143,6 @@
       </section>
     </main>
 
-    <script src="app.js"></script>
+    <script type="module" src="/js/app.js"></script>
   </body>
 </html>
