@@ -14,8 +14,6 @@ let pickedCoffee = null;
 const $ = (id) => document.getElementById(id);
 
 async function init() {
-  wireTabs();
-
   try {
     const [me, bags] = await Promise.all([getMe(), getBags()]);
     state.owner = me.owner;
@@ -25,6 +23,7 @@ async function init() {
     return;
   }
 
+  wireTabs();
   wireHeader();
   if (state.owner) wireForm();
   render();
@@ -123,8 +122,8 @@ function bagMarkup(bag) {
     </div>
     <div class="meta">
       ${bag.roast ? `<span class="chip">${escapeHtml(bag.roast)}</span>` : ""}
-      ${bag.black ? `<span class="chip rated">B ${bag.black}</span>` : ""}
-      ${bag.milk ? `<span class="chip rated">M ${bag.milk}</span>` : ""}
+      ${bag.black ? `<span class="chip rated">Black ${bag.black}</span>` : ""}
+      ${bag.milk ? `<span class="chip rated">Milk ${bag.milk}</span>` : ""}
       <span class="chip">${escapeHtml(bag.date || "")}</span>
     </div>
     ${bag.note ? `<p class="note">${escapeHtml(bag.note)}</p>` : ""}
