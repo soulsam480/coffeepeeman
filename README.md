@@ -43,6 +43,40 @@ Cron, Monday and Thursday after their refresh:
 
 On macOS with launchd, point a `StartCalendarInterval` job at the same command.
 
+## Saptabeeja and licensing
+
+The catalog comes from [Saptabeeja](https://saptabeeja.coffee). `scripts/sync.py`
+reads two public files:
+
+```
+/data/catalog-index.json
+/data/details/<roaster>.json
+```
+
+**What they allow.** Their `robots.txt` is `User-agent: * / Allow: /` (only SEO
+crawlers are blocked), so automated fetching is not disallowed. Their `/about`
+says the data is read from each roaster's own public product listing, refreshed
+Monday and Thursday, that the roaster's page is the source of truth, and that
+corrections and removal requests are handled.
+
+**What they do not grant.** There is no licence and no terms page — `/terms`,
+`/licence`, `/license` and `/privacy` all return 404. `robots.txt` is not a
+licence. So there is no explicit permission to redistribute their catalog.
+
+**What this project does about it.**
+
+- The catalog is a **private cache for personal use**, not a republished dataset.
+- We do not copy roaster images; `catalog.json` stores no image URLs.
+- Every recommendation links out to the roaster to buy.
+- If Saptabeeja or a roaster asks for a coffee or a brand to be removed, remove it.
+
+**If you fork this and deploy it publicly:** do not serve `data/catalog.json` as
+a public file or turn it into an open catalog API. Put the file behind auth, or
+fetch from the roaster's own storefront (Shopify `products.json`, Woo Store API)
+instead. For anything beyond personal use, ask Saptabeeja first.
+
+The code is yours to fork. The catalog is not.
+
 ## How the suggestion works
 
 - Only bags with a black or milk score count.
