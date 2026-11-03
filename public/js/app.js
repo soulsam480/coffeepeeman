@@ -61,10 +61,19 @@ document.addEventListener("alpine:init", () => {
       return price ? `₹${price}/100g` : "";
     },
 
-    reason(pick) {
-      const flavours = pick.coffee.flavours.slice(0, 3).join(", ");
-      const tail = flavours ? `, ${flavours}` : "";
-      return `Closest to ${pick.closest.name} (${pick.closest.roaster}) — ${pick.coffee.roast}${tail}.`;
+    reason(pick, index) {
+      const coffee = pick.coffee;
+      const profile = [coffee.roast, ...coffee.flavours.slice(0, 2)]
+        .filter(Boolean)
+        .join(", ");
+
+      if (index === 0 && pick.closest) {
+        return `Closest to ${pick.closest.name} (${pick.closest.roaster}) — ${profile}.`;
+      }
+      if (pick.isNewRoaster) {
+        return `New roaster, same ${profile} profile.`;
+      }
+      return `${profile} — your kind of cup.`;
     },
 
     showView(view) {

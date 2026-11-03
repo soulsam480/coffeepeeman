@@ -259,7 +259,7 @@
         </div>
 
         <div class="picks">
-          <template x-for="pick in picks" :key="pick.coffee.id">
+          <template x-for="(pick, index) in picks" :key="pick.coffee.id">
             <article class="pick">
               <div class="pick-head">
                 <div class="kind" x-text="pick.kind"></div>
@@ -278,7 +278,7 @@
                   <span x-text="'per ' + pick.coffee.grams + 'g'"></span>
                 </div>
               </div>
-              <p class="why" x-show="pick.closest" x-text="reason(pick)"></p>
+              <p class="why" x-text="reason(pick, index)"></p>
               <a
                 :href="pick.coffee.url"
                 target="_blank"
