@@ -62,6 +62,11 @@
 
     <main>
       <section x-show="view === 'ledger'">
+        <p class="intro">
+          This is my coffee list. I started in January 2026, after buying one
+          bag too many I couldn't remember. Every coffee gets two scores — black
+          and milk — because they're different drinks. The list does the rest.
+        </p>
         <ul class="bags">
           <template x-for="bag in bags" :key="bag.id">
             <li class="bag">

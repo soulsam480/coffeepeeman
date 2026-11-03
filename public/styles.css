@@ -128,6 +128,14 @@ main {
   gap: 10px;
 }
 
+.intro {
+  margin: 4px 0 18px;
+  max-width: 58ch;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
 .bag {
   background: var(--card);
   border: 1px solid var(--rule);
