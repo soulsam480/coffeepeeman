@@ -247,15 +247,21 @@
 
       <section x-show="view === 'next'">
         <div class="picks-toolbar">
-          <label class="pick-count">
-            Suggestions
-            <select x-model.number="count" @change="setCount()">
-              <option value="4">4</option>
-              <option value="8">8</option>
-              <option value="12">12</option>
-              <option value="20">20</option>
-            </select>
-          </label>
+          <span class="toolbar-label">Show</span>
+          <div
+            class="segmented"
+            role="group"
+            aria-label="Number of suggestions"
+          >
+            <template x-for="option in countOptions" :key="option">
+              <button
+                type="button"
+                x-text="option"
+                :aria-pressed="count === option"
+                @click="count = option; setCount()"
+              ></button>
+            </template>
+          </div>
         </div>
 
         <div class="picks">

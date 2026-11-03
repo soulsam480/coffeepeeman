@@ -29,6 +29,7 @@ document.addEventListener("alpine:init", () => {
     catalog: null,
     picks: [],
     count: Number(localStorage.getItem(PICK_COUNT_KEY)) || DEFAULT_PICK_COUNT,
+    countOptions: [4, 8, 12, 20],
     query: "",
     suggestions: [],
     picked: null,

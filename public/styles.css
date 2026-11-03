@@ -11,6 +11,7 @@
   --accent: #2f5d3a;
   --accent-ink: #ffffff;
   --score: #8a3b2a;
+  --track: #ece5d8;
   --radius: 14px;
 }
 
@@ -89,12 +90,12 @@ h1 {
   top: 0;
   z-index: 5;
   display: flex;
-  gap: 4px;
-  padding: 8px 16px;
-  max-width: 720px;
-  margin: 0 auto;
-  background: color-mix(in srgb, var(--ground) 92%, transparent);
-  backdrop-filter: blur(8px);
+  gap: 2px;
+  width: min(688px, calc(100% - 32px));
+  margin: 0 auto 8px;
+  padding: 4px;
+  background: var(--track);
+  border-radius: 12px;
 }
 
 .tabs button {
@@ -104,14 +105,24 @@ h1 {
   color: var(--muted);
   font: inherit;
   font-weight: 500;
-  padding: 10px 12px;
-  border-radius: 999px;
+  padding: 9px 12px;
+  border-radius: 9px;
   cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.tabs button:hover {
+  color: var(--ink);
 }
 
 .tabs button[aria-selected="true"] {
-  background: var(--ink);
-  color: var(--ground);
+  background: var(--card);
+  color: var(--ink);
+  box-shadow:
+    0 1px 2px rgba(28, 26, 23, 0.08),
+    0 0 0 1px rgba(28, 26, 23, 0.04);
 }
 
 main {
@@ -355,6 +366,55 @@ legend span {
 .suggest small {
   display: block;
   color: var(--muted);
+}
+
+.picks-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 4px 0 14px;
+}
+
+.toolbar-label {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.segmented {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  background: var(--track);
+  border-radius: 999px;
+}
+
+.segmented button {
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  padding: 6px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.segmented button:hover {
+  color: var(--ink);
+}
+
+.segmented button[aria-pressed="true"] {
+  background: var(--ink);
+  color: var(--ground);
+}
+
+.pick-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
 }
 
 .picks {
