@@ -8,93 +8,182 @@
     />
     <meta name="theme-color" content="#f6f2ea" />
     <title>Coffee</title>
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/styles.css" />
   </head>
-  <body>
+  <body x-data="coffeeLedger" x-init="init()" x-cloak>
     <header class="top">
       <div>
         <h1>Coffee</h1>
-        <p class="count" id="count"></p>
+        <p class="count" x-text="summary"></p>
       </div>
       <div class="head-actions">
-        <button class="ghost" id="exportBtn" type="button" hidden>
+        <button
+          class="ghost"
+          type="button"
+          x-show="owner"
+          @click="exportBags()"
+        >
           Export
         </button>
-        <a class="ghost" id="authLink" href="/login">Sign in</a>
+        <a
+          class="ghost"
+          :href="owner ? '/logout' : '/login'"
+          x-text="owner ? 'Sign out' : 'Sign in'"
+        ></a>
       </div>
     </header>
 
-    <nav class="tabs" role="tablist">
-      <button role="tab" data-view="ledger" aria-selected="true">Ledger</button>
-      <button role="tab" data-view="add" aria-selected="false" hidden>
+    <nav class="tabs" role="tablist" x-show="owner">
+      <button
+        role="tab"
+        :aria-selected="view === 'ledger'"
+        @click="showView('ledger')"
+      >
+        Ledger
+      </button>
+      <button
+        role="tab"
+        x-show="owner"
+        :aria-selected="view === 'add'"
+        @click="showView('add')"
+      >
         Add
       </button>
-      <button role="tab" data-view="next" aria-selected="false" hidden>
+      <button
+        role="tab"
+        x-show="owner"
+        :aria-selected="view === 'next'"
+        @click="showView('next')"
+      >
         Next
       </button>
     </nav>
 
     <main>
-      <section id="view-ledger">
-        <ul class="bags" id="bagList"></ul>
-        <p class="empty" id="ledgerEmpty" hidden>Nothing here yet.</p>
-        <p class="fine" id="publicNote" hidden>
+      <section x-show="view === 'ledger'">
+        <ul class="bags">
+          <template x-for="bag in bags" :key="bag.id">
+            <li class="bag">
+              <div class="bag-head">
+                <div>
+                  <h3 x-text="displayName(bag.name)"></h3>
+                  <p class="roaster" x-text="bag.roaster"></p>
+                </div>
+                <span class="price" x-text="priceLabel(bag)"></span>
+              </div>
+              <div class="meta">
+                <span class="chip" x-show="bag.roast" x-text="bag.roast"></span>
+                <span
+                  class="chip rated"
+                  x-show="bag.black"
+                  x-text="'Black ' + bag.black"
+                ></span>
+                <span
+                  class="chip rated"
+                  x-show="bag.milk"
+                  x-text="'Milk ' + bag.milk"
+                ></span>
+                <span class="chip" x-text="bag.date"></span>
+              </div>
+              <p class="note" x-show="bag.note" x-text="bag.note"></p>
+              <details class="rate" x-show="owner">
+                <summary
+                  x-text="bag.black || bag.milk ? 'Edit score' : 'Rate'"
+                ></summary>
+                <div class="score-row">
+                  <span>Black</span>
+                  <div class="score">
+                    <template x-for="score in scores" :key="score">
+                      <button
+                        type="button"
+                        x-text="score"
+                        :aria-pressed="bag.black === score"
+                        @click="rate(bag, 'black', score)"
+                      ></button>
+                    </template>
+                  </div>
+                </div>
+                <div class="score-row">
+                  <span>Milk</span>
+                  <div class="score">
+                    <template x-for="score in scores" :key="score">
+                      <button
+                        type="button"
+                        x-text="score"
+                        :aria-pressed="bag.milk === score"
+                        @click="rate(bag, 'milk', score)"
+                      ></button>
+                    </template>
+                  </div>
+                </div>
+              </details>
+            </li>
+          </template>
+        </ul>
+        <p
+          class="empty"
+          x-show="!bags.length"
+          x-text="error || 'Nothing here yet.'"
+        ></p>
+        <p class="fine" x-show="!owner && bags.length">
           The list is public. <a href="/login">Sign in</a> to add a bag or rate
           one.
         </p>
       </section>
 
-      <section id="view-add" hidden>
-        <form id="addForm" autocomplete="off">
+      <section x-show="view === 'add'">
+        <form class="add-form" @submit.prevent="save()">
           <label>
             Roaster
-            <input
-              name="roaster"
-              id="roaster"
-              required
-              placeholder="Sip Magic"
-            />
+            <input x-model="form.roaster" required placeholder="Sip Magic" />
           </label>
-          <label>
+          <label class="autocomplete" @click.outside="suggestions = []">
             Coffee
             <input
-              name="name"
-              id="coffee"
+              x-model="query"
               required
               placeholder="Mysore Nuggets Bold"
+              @input.debounce.200ms="search()"
             />
-            <div class="suggest" id="suggest" hidden></div>
+            <div class="suggest" x-show="suggestions.length">
+              <template x-for="coffee in suggestions" :key="coffee.id">
+                <button type="button" @click="pickSuggestion(coffee)">
+                  <span x-text="displayName(coffee.name)"></span>
+                  <small
+                    x-text="coffee.roaster + (coffee.per100 ? ' · ₹' + Math.round(coffee.per100) + '/100g' : '')"
+                  ></small>
+                </button>
+              </template>
+            </div>
           </label>
+
           <div class="row">
             <label>
               Price ₹
               <input
-                name="price"
-                id="price"
+                x-model.number="form.price"
                 type="number"
                 inputmode="decimal"
                 min="0"
-                step="1"
                 placeholder="599"
               />
             </label>
             <label>
               Weight g
               <input
-                name="grams"
-                id="grams"
+                x-model.number="form.grams"
                 type="number"
                 inputmode="numeric"
                 min="0"
-                step="1"
-                value="250"
               />
             </label>
           </div>
+
           <div class="row">
             <label>
               Roast
-              <select name="roast" id="roast">
+              <select x-model="form.roast">
                 <option value="">Not sure</option>
                 <option>light</option>
                 <option>light-medium</option>
@@ -105,27 +194,44 @@
             </label>
             <label>
               Bought
-              <input name="date" id="date" type="date" />
+              <input x-model="form.date" type="date" />
             </label>
           </div>
 
           <fieldset>
-            <legend>How was it? <span>optional, tap a score</span></legend>
+            <legend>How was it? <span>optional</span></legend>
             <div class="score-row">
               <span>Black</span>
-              <div class="score" id="blackScore" data-axis="black"></div>
+              <div class="score">
+                <template x-for="score in scores" :key="score">
+                  <button
+                    type="button"
+                    x-text="score"
+                    :aria-pressed="form.black === score"
+                    @click="form.black = form.black === score ? null : score"
+                  ></button>
+                </template>
+              </div>
             </div>
             <div class="score-row">
               <span>Milk</span>
-              <div class="score" id="milkScore" data-axis="milk"></div>
+              <div class="score">
+                <template x-for="score in scores" :key="score">
+                  <button
+                    type="button"
+                    x-text="score"
+                    :aria-pressed="form.milk === score"
+                    @click="form.milk = form.milk === score ? null : score"
+                  ></button>
+                </template>
+              </div>
             </div>
           </fieldset>
 
           <label>
             Note
             <input
-              name="note"
-              id="note"
+              x-model="form.note"
               placeholder="toffee, hazelnut, low bitterness"
             />
           </label>
@@ -134,15 +240,63 @@
         </form>
       </section>
 
-      <section id="view-next" hidden>
-        <div class="picks" id="picks"></div>
-        <p class="empty" id="nextEmpty" hidden>
+      <section x-show="view === 'next'">
+        <div class="picks-toolbar">
+          <label class="pick-count">
+            Suggestions
+            <select x-model.number="count" @change="setCount()">
+              <option value="4">4</option>
+              <option value="8">8</option>
+              <option value="12">12</option>
+              <option value="20">20</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="picks">
+          <template x-for="pick in picks" :key="pick.coffee.id">
+            <article class="pick">
+              <div class="pick-head">
+                <div class="kind" x-text="pick.kind"></div>
+                <span class="chip" x-show="pick.isNewRoaster">New roaster</span>
+              </div>
+              <h3 x-text="displayName(pick.coffee.name)"></h3>
+              <p class="roaster" x-text="pick.coffee.roaster"></p>
+              <div class="numbers">
+                <div>
+                  <strong x-text="'₹' + Math.round(pick.coffee.per100)"></strong
+                  >per 100g
+                </div>
+                <div><strong x-text="pick.coffee.roast"></strong>roast</div>
+                <div>
+                  <strong x-text="'₹' + pick.coffee.price"></strong>
+                  <span x-text="'per ' + pick.coffee.grams + 'g'"></span>
+                </div>
+              </div>
+              <p class="why" x-show="pick.closest" x-text="reason(pick)"></p>
+              <a
+                :href="pick.coffee.url"
+                target="_blank"
+                rel="noopener"
+                x-show="pick.coffee.url"
+              >
+                Open bag →
+              </a>
+            </article>
+          </template>
+        </div>
+
+        <p class="empty" x-show="!picks.length">
           Rate a few bags first — two scores per bag is enough.
         </p>
-        <p class="fine" id="nextFine"></p>
+        <p class="fine" x-show="picks.length">
+          Prices from the last catalog sync. Check the roaster's page before
+          buying.
+        </p>
       </section>
     </main>
 
     <script type="module" src="/js/app.js"></script>
+    <script defer src="/js/alpine.min.js"></script>
   </body>
 </html>

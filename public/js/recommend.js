@@ -17,6 +17,7 @@ const STRETCH_START_RANK = 4;
 const STRETCH_END_RANK = 30;
 const STRETCH_MIN_SCORE = 0.3;
 const NEUTRAL_SCORE = 0.5;
+const DEFAULT_LIMIT = 8;
 const MEDIUM_ROASTS = new Set(["medium", "medium-dark"]);
 const NON_COFFEE =
   /chicory|pods|sachet|drip bag|green bean|gift|hamper|bundle|sampler|cascara|merch|mug|tumbler|voucher|custom/i;
@@ -155,7 +156,7 @@ function findStretch(scored, safe) {
   );
 }
 
-export function recommend(bags, catalog) {
+export function recommend(bags, catalog, limit = DEFAULT_LIMIT) {
   const preferences = bags
     .map((bag) => ({ bag, weight: ratingWeight(bag) }))
     .filter((preference) => preference.weight !== 0);
@@ -163,6 +164,7 @@ export function recommend(bags, catalog) {
   if (!preferences.length) return [];
 
   const owned = new Set(bags.map((bag) => nameKey(bag.roaster, bag.name)));
+  const triedRoasters = new Set(bags.map((bag) => bag.roaster.toLowerCase()));
   const recentRoasters = new Set(
     bags.slice(0, 2).map((bag) => bag.roaster.toLowerCase()),
   );
@@ -179,8 +181,31 @@ export function recommend(bags, catalog) {
     ) || scored[0];
   const stretch = findStretch(scored, safe);
 
-  return [safe, stretch].filter(Boolean).map((pick, index) => ({
-    ...pick,
-    kind: index === 0 ? "Safe pick" : "One stretch",
-  }));
+  const picks = [];
+  const usedCoffees = new Set();
+  const usedRoasters = new Set();
+
+  function addPick(pick, kind) {
+    if (!pick || picks.length >= limit) return;
+    if (usedCoffees.has(pick.coffee.id)) return;
+
+    picks.push({
+      ...pick,
+      kind,
+      isNewRoaster: !triedRoasters.has(pick.coffee.roaster.toLowerCase()),
+    });
+    usedCoffees.add(pick.coffee.id);
+    usedRoasters.add(pick.coffee.roaster);
+  }
+
+  addPick(safe, "Safe pick");
+  addPick(stretch, "One stretch");
+
+  for (const candidate of scored) {
+    if (picks.length >= limit) break;
+    if (usedRoasters.has(candidate.coffee.roaster)) continue;
+    addPick(candidate, "Also worth trying");
+  }
+
+  return picks;
 }

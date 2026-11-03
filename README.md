@@ -45,7 +45,7 @@ npx wrangler d1 execute coffee-ledger --local --file=migrations/0001_init.sql
 
 ## Deploy
 
-Live at **https://coffee-ledger.sambitsahoojs.workers.dev**
+Live at **https://coffeepeeman.sambitsahoo.com**
 
 ```sh
 npx wrangler deploy

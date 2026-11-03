@@ -1,6 +1,6 @@
 import { loginPage } from "./login.js";
 
-export const AUTH_COOKIE = "coffee_auth";
+export const AUTH_COOKIE = "__Host-coffee_auth";
 
 const ONE_YEAR_SECONDS = 60 * 60 * 24 * 365;
 

@@ -12,3 +12,7 @@ run_worker_first = true
 binding = "DB"
 database_name = "coffee-ledger"
 database_id = "9f7d288e-e15c-495b-93fe-6e6c4a6e035b"
+
+[[routes]]
+pattern = "coffeepeeman.sambitsahoo.com"
+custom_domain = true
