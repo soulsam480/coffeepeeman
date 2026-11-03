@@ -56,6 +56,11 @@ export function handleLogin(request, env, owner) {
 }
 
 async function submitLogin(request, env) {
+  const origin = request.headers.get("origin");
+  if (origin && origin !== new URL(request.url).origin) {
+    return html(loginPage("Bad request."), 403);
+  }
+
   const form = await request.formData();
   const token = String(form.get("token") || "");
 
