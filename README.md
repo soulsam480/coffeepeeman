@@ -19,6 +19,7 @@ public/               static app
   js/format.js        naming, price, flavour helpers
   js/recommend.js     scoring, pure functions
   js/alpine.min.js    self-hosted Alpine
+  og.png              link preview card (generated)
 
 src/                  Worker
   index.js            routes and security headers
@@ -70,6 +71,18 @@ the session lasts a year. `/logout` clears it.
 `run_worker_first = true` in `wrangler.toml` is load-bearing: without it,
 Cloudflare serves the static assets directly and the token gate is bypassed.
 
+## OG image
+
+`public/og.png` is the 1200×630 link preview card. It is rendered from
+`scripts/og-card.html`:
+
+```sh
+sh scripts/render-og.sh
+```
+
+Edit the HTML for copy or layout changes, then re-render. The script uses a
+local Chromium-based browser (override with `CHROME=/path/to/browser`).
+
 ## Sync the catalog
 
 ```sh
@@ -114,8 +127,10 @@ The code is MIT licensed. The catalog is not covered.
 
 ## Data model
 
-- `bags` — roaster, coffee, roast, price, grams, date, black score, milk score, note
-- `catalog` — Saptabeeja's coffees: name, roaster, roast, process, flavours, price, buy URL
+- `bags` — roaster, coffee, roast, price, grams, date, black score, milk score,
+  note
+- `catalog` — Saptabeeja's coffees: name, roaster, roast, process, flavours,
+  price, buy URL
 
 ## Next
 

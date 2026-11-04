@@ -1,10 +1,13 @@
 {
   "name": "coffeepeeman",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "npx wrangler dev",
     "deploy": "npx wrangler deploy",
     "sync": "python3 scripts/sync.py",
-    "serve": "python3 -m http.server 8787 -d public"
+    "og": "sh scripts/render-og.sh",
+    "serve": "python3 -m http.server 8787 -d public",
+    "test": "node --test"
   }
 }

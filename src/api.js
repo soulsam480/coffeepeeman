@@ -1,5 +1,5 @@
 const BAG_COLUMNS =
-  "id, roaster, name, roast, price, grams, date, black, milk, note, created_at";
+  "id, roaster, name, roast, price, grams, date, black, milk, note, flavours, process, created_at";
 const CATALOG_COLUMNS =
   "id, roaster, name, roast, process, flavours, species, estate, region, price, grams, per100, url";
 const EDITABLE_FIELDS = [
@@ -12,6 +12,8 @@ const EDITABLE_FIELDS = [
   "black",
   "milk",
   "note",
+  "flavours",
+  "process",
 ];
 const ROASTS = new Set([
   "light",
@@ -26,6 +28,8 @@ const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const MAX_BODY_BYTES = 16 * 1024;
 const MAX_TEXT_LENGTH = 120;
 const MAX_NOTE_LENGTH = 500;
+const MAX_TAGS = 20;
+const MAX_TAG_LENGTH = 40;
 const SCORE_MIN = 1;
 const SCORE_MAX = 5;
 
@@ -56,7 +60,9 @@ async function listBags(env) {
   const { results } = await env.DB.prepare(
     `SELECT ${BAG_COLUMNS} FROM bags ORDER BY date DESC, id DESC`,
   ).all();
-  return Response.json(results, { headers: { "cache-control": "no-store" } });
+  return Response.json(results.map(parseBagRow), {
+    headers: { "cache-control": "no-store" },
+  });
 }
 
 async function listCatalog(env) {
@@ -66,6 +72,14 @@ async function listCatalog(env) {
   return Response.json(results.map(parseCatalogRow), {
     headers: { "cache-control": "no-store" },
   });
+}
+
+function parseBagRow(row) {
+  return {
+    ...row,
+    flavours: parseArray(row.flavours),
+    process: parseArray(row.process),
+  };
 }
 
 function parseCatalogRow(row) {
@@ -101,8 +115,8 @@ async function createBag(request, env) {
 
   const now = new Date().toISOString();
   const row = await env.DB.prepare(
-    `INSERT INTO bags (roaster, name, roast, price, grams, date, black, milk, note, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `INSERT INTO bags (roaster, name, roast, price, grams, date, black, milk, note, flavours, process, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
      RETURNING ${BAG_COLUMNS}`,
   )
     .bind(
@@ -115,11 +129,13 @@ async function createBag(request, env) {
       body.black ?? null,
       body.milk ?? null,
       body.note || "",
+      JSON.stringify(sanitizeTags(body.flavours)),
+      JSON.stringify(sanitizeTags(body.process)),
       now,
     )
     .first();
 
-  return Response.json(row, { status: 201 });
+  return Response.json(parseBagRow(row), { status: 201 });
 }
 
 async function updateBag(request, env, id) {
@@ -131,7 +147,12 @@ async function updateBag(request, env, id) {
 
   const changes = {};
   for (const field of EDITABLE_FIELDS) {
-    if (field in body) changes[field] = body[field];
+    if (field in body) {
+      changes[field] =
+        field === "flavours" || field === "process"
+          ? JSON.stringify(sanitizeTags(body[field]))
+          : body[field];
+    }
   }
 
   const fields = Object.keys(changes);
@@ -146,7 +167,7 @@ async function updateBag(request, env, id) {
     .bind(...values, id)
     .first();
 
-  return row ? Response.json(row) : notFound();
+  return row ? Response.json(parseBagRow(row)) : notFound();
 }
 
 async function deleteBag(env, id) {
@@ -207,6 +228,27 @@ function isNote(value) {
   return typeof value === "string" && value.length <= MAX_NOTE_LENGTH;
 }
 
+function isTags(value) {
+  return (
+    value === null ||
+    value === undefined ||
+    (Array.isArray(value) &&
+      value.length <= MAX_TAGS &&
+      value.every(
+        (tag) => typeof tag === "string" && tag.length <= MAX_TAG_LENGTH,
+      ))
+  );
+}
+
+function sanitizeTags(value) {
+  return Array.isArray(value)
+    ? value
+        .map((tag) => tag.trim().toLowerCase())
+        .filter(Boolean)
+        .slice(0, MAX_TAGS)
+    : [];
+}
+
 function validateCreate(body) {
   if (!body || typeof body !== "object") return "expected an object";
   if (!isText(body.roaster)) return "roaster is required";
@@ -217,6 +259,8 @@ function validateCreate(body) {
     return "invalid price or grams";
   if (body.date && !DATE_PATTERN.test(body.date)) return "invalid date";
   if (body.note && !isNote(body.note)) return "note is too long";
+  if (!isTags(body.flavours)) return "invalid flavours";
+  if (!isTags(body.process)) return "invalid process";
   return null;
 }
 
@@ -231,6 +275,8 @@ function validateUpdate(body) {
   if ("grams" in body && !isAmount(body.grams)) return "invalid grams";
   if ("date" in body && !DATE_PATTERN.test(body.date)) return "invalid date";
   if ("note" in body && !isNote(body.note)) return "note is too long";
+  if ("flavours" in body && !isTags(body.flavours)) return "invalid flavours";
+  if ("process" in body && !isTags(body.process)) return "invalid process";
   return null;
 }
 

@@ -1,8 +1,9 @@
 import { addBag, getBags, getCatalog, getMe, updateBag } from "./api.js";
 import { cleanName, deriveFlavours, per100 } from "./format.js";
-import { recommend } from "./recommend.js";
+import { recommend, DEFAULT_ADVENTURE } from "./recommend.js";
 
 const PICK_COUNT_KEY = "coffee.pickCount";
+const ADVENTURE_KEY = "coffee.adventure";
 const DEFAULT_PICK_COUNT = 8;
 const SEARCH_LIMIT = 7;
 const MIN_QUERY_LENGTH = 2;
@@ -29,6 +30,11 @@ document.addEventListener("alpine:init", () => {
     catalog: null,
     picks: [],
     count: Number(localStorage.getItem(PICK_COUNT_KEY)) || DEFAULT_PICK_COUNT,
+    adventure: (() => {
+      const stored = localStorage.getItem(ADVENTURE_KEY);
+      const value = stored === null ? DEFAULT_ADVENTURE : Number(stored);
+      return Number.isFinite(value) ? value : DEFAULT_ADVENTURE;
+    })(),
     countOptions: [4, 8, 12, 20],
     query: "",
     suggestions: [],
@@ -57,24 +63,76 @@ document.addEventListener("alpine:init", () => {
 
     displayName: (name) => cleanName(name),
 
+    get groupedPicks() {
+      const groups = [
+        {
+          kind: "Comfort pick",
+          title: "Your usual",
+          note: "Close to what you rate well.",
+        },
+        {
+          kind: "One step out",
+          title: "One step out",
+          note: "One new thing, still anchored.",
+        },
+        {
+          kind: "Something new",
+          title: "Something new",
+          note: "Further out, still your kind of cup.",
+        },
+      ];
+
+      return groups
+        .map((group) => ({
+          ...group,
+          picks: this.picks.filter((pick) => pick.kind === group.kind),
+        }))
+        .filter((group) => group.picks.length);
+    },
+
+    get mixSummary() {
+      const counts = this.picks.reduce((result, pick) => {
+        result[pick.kind] = (result[pick.kind] || 0) + 1;
+        return result;
+      }, {});
+      const parts = [];
+
+      if (counts["Comfort pick"]) {
+        parts.push(`${counts["Comfort pick"]} familiar`);
+      }
+      if (counts["One step out"]) {
+        parts.push(`${counts["One step out"]} one step out`);
+      }
+      if (counts["Something new"]) {
+        parts.push(`${counts["Something new"]} new`);
+      }
+
+      return parts.join(" · ");
+    },
+
     priceLabel(bag) {
       const price = per100(bag);
       return price ? `₹${price}/100g` : "";
     },
 
-    reason(pick, index) {
-      const coffee = pick.coffee;
-      const profile = [coffee.roast, ...coffee.flavours.slice(0, 2)]
-        .filter(Boolean)
-        .join(", ");
+    reason(pick) {
+      const matched = pick.matchedFlavours.slice(0, 2).join(" and ");
 
-      if (index === 0 && pick.closest) {
-        return `Closest to ${pick.closest.name} (${pick.closest.roaster}) — ${profile}.`;
+      if (pick.kind === "Comfort pick") {
+        return matched
+          ? `Your usual ${pick.coffee.roast}, ${matched}.`
+          : `Your usual ${pick.coffee.roast} profile.`;
       }
-      if (pick.isNewRoaster) {
-        return `New roaster, same ${profile} profile.`;
-      }
-      return `${profile} — your kind of cup.`;
+
+      const novel = [];
+      if (pick.novelty.roast) novel.push("a different roast");
+      if (pick.novelty.process) novel.push("a new process");
+      if (pick.novelty.flavour) novel.push("new flavours");
+      const change = novel.join(" and ") || "a small change";
+
+      return pick.kind === "One step out"
+        ? `Same ${matched || "profile"}, ${change}.`
+        : `Something new for you: ${change}${matched ? `, still ${matched}` : ""}.`;
     },
 
     showView(view) {
@@ -160,7 +218,10 @@ document.addEventListener("alpine:init", () => {
     async loadPicks() {
       try {
         const catalog = await this.loadCatalog();
-        this.picks = recommend(this.bags, catalog, this.count);
+        this.picks = recommend(this.bags, catalog, {
+          limit: this.count,
+          adventure: this.adventure,
+        });
       } catch (error) {
         this.error = error.message;
       }
@@ -168,6 +229,15 @@ document.addEventListener("alpine:init", () => {
 
     setCount() {
       localStorage.setItem(PICK_COUNT_KEY, this.count);
+      this.loadPicks();
+    },
+
+    setAdventure() {
+      localStorage.setItem(ADVENTURE_KEY, this.adventure);
+      this.loadPicks();
+    },
+
+    shuffle() {
       this.loadPicks();
     },
 

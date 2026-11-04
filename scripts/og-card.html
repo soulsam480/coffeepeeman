@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  html, body { margin: 0; padding: 0; background: #f6f2ea; }
+  svg { display: block; }
+</style>
+</head>
+<body>
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+    </filter>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="10" stdDeviation="18" flood-color="#1c1a17" flood-opacity="0.10"/>
+    </filter>
+    <clipPath id="panelClip">
+      <path d="M844 230 A150 150 0 0 1 1144 230 L1144 496 Q1144 528 1112 528 L876 528 Q844 528 844 496 Z"/>
+    </clipPath>
+  </defs>
+
+  <!-- ground -->
+  <rect width="1200" height="630" fill="#f6f2ea"/>
+
+  <!-- card -->
+  <rect x="24" y="24" width="1152" height="582" rx="20" fill="#fffdf8" stroke="#e2dbcf"/>
+
+  <!-- lockup -->
+  <g transform="translate(88 92)">
+    <rect width="44" height="44" rx="11" fill="#2f5d3a"/>
+    <g transform="translate(6 6) scale(1)">
+      <path d="M11 9h10v7a5 5 0 0 1-10 0V9Z" fill="#f6f2ea"/>
+      <path d="M11 11H8a3 3 0 0 0 3 3M21 11h3a3 3 0 0 1-3 3" fill="none" stroke="#f6f2ea" stroke-width="2" stroke-linecap="round"/>
+      <path d="M16 21v3" stroke="#f6f2ea" stroke-width="2" stroke-linecap="round"/>
+    </g>
+    <text x="60" y="29" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Roboto, sans-serif"
+          font-size="15" font-weight="700" letter-spacing="3.2" fill="#2f5d3a">COFFEEPEEMAN</text>
+  </g>
+
+  <!-- headline -->
+  <text x="84" y="286" font-family="'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif"
+        font-size="130" letter-spacing="-4" fill="#1c1a17">Coffee,</text>
+  <text x="84" y="400" font-family="'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif"
+        font-size="130" font-style="italic" letter-spacing="-3" fill="#2f5d3a">kept.</text>
+
+  <!-- subhead -->
+  <text x="88" y="466" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Roboto, sans-serif"
+        font-size="23" fill="#6f685d">Every bag I buy, scored black and milk —</text>
+  <text x="88" y="500" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Roboto, sans-serif"
+        font-size="23" fill="#6f685d">and what to buy next.</text>
+
+  <!-- footer -->
+  <g transform="translate(88 540)">
+    <rect width="26" height="3" rx="1.5" fill="#8a3b2a"/>
+    <text x="0" y="34" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Roboto, sans-serif"
+          font-size="18" fill="#6f685d">coffeepeeman.sambitsahoo.com</text>
+  </g>
+
+  <!-- illustration panel -->
+  <g filter="url(#shadow)">
+    <path d="M844 230 A150 150 0 0 1 1144 230 L1144 496 Q1144 528 1112 528 L876 528 Q844 528 844 496 Z" fill="#2f5d3a"/>
+  </g>
+  <g clip-path="url(#panelClip)">
+    <circle cx="994" cy="250" r="122" fill="none" stroke="#f6f2ea" stroke-opacity="0.14" stroke-width="2"/>
+    <circle cx="994" cy="250" r="96" fill="#f6f2ea" fill-opacity="0.06"/>
+
+    <!-- steam -->
+    <g stroke="#f6f2ea" stroke-opacity="0.55" stroke-width="7" stroke-linecap="round" fill="none">
+      <path d="M948 214c-14-18 14-30 0-50"/>
+      <path d="M994 206c-14-20 14-32 0-56"/>
+      <path d="M1040 214c-14-18 14-30 0-50"/>
+    </g>
+
+    <!-- saucer -->
+    <ellipse cx="994" cy="420" rx="112" ry="20" fill="#f6f2ea" fill-opacity="0.28"/>
+    <ellipse cx="994" cy="414" rx="102" ry="17" fill="#f6f2ea"/>
+
+    <!-- handle -->
+    <path d="M1076 310q52 0 52 38t-56 38" fill="none" stroke="#f6f2ea" stroke-width="15" stroke-linecap="round"/>
+
+    <!-- cup -->
+    <path d="M902 296h184l-14 92q-3 24-27 24h-102q-24 0-27-24z" fill="#f6f2ea"/>
+    <ellipse cx="994" cy="298" rx="92" ry="17" fill="#f6f2ea"/>
+    <ellipse cx="994" cy="299" rx="76" ry="12" fill="#4a2a1a"/>
+    <path d="M930 309q64 26 128 0" fill="none" stroke="#e2dbcf" stroke-width="2" stroke-opacity="0.7"/>
+
+    <!-- beans -->
+    <g>
+      <g transform="translate(898 456) rotate(-24)">
+        <ellipse rx="14" ry="19" fill="#d9c7a8"/>
+        <path d="M0 -16q-6 8 0 16t0 16" fill="none" stroke="#8a3b2a" stroke-width="2.5" stroke-linecap="round"/>
+      </g>
+      <g transform="translate(944 476) rotate(12)">
+        <ellipse rx="14" ry="19" fill="#d9c7a8"/>
+        <path d="M0 -16q-6 8 0 16t0 16" fill="none" stroke="#8a3b2a" stroke-width="2.5" stroke-linecap="round"/>
+      </g>
+      <g transform="translate(1082 470) rotate(38)">
+        <ellipse rx="14" ry="19" fill="#d9c7a8"/>
+        <path d="M0 -16q-6 8 0 16t0 16" fill="none" stroke="#8a3b2a" stroke-width="2.5" stroke-linecap="round"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- grain -->
+  <rect width="1200" height="630" filter="url(#grain)" opacity="0.05" style="mix-blend-mode:multiply"/>
+</svg>
+</body>
+</html>

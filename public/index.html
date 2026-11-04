@@ -7,7 +7,41 @@
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
     <meta name="theme-color" content="#f6f2ea" />
+    <meta
+      name="description"
+      content="A personal coffee ledger — every bag scored black and milk, and what to buy next."
+    />
     <title>Coffee</title>
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Coffee" />
+    <meta property="og:title" content="Coffee, kept." />
+    <meta
+      property="og:description"
+      content="A personal coffee ledger — every bag scored black and milk, and what to buy next."
+    />
+    <meta property="og:url" content="https://coffeepeeman.sambitsahoo.com/" />
+    <meta
+      property="og:image"
+      content="https://coffeepeeman.sambitsahoo.com/og.png"
+    />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Coffee, kept. — a personal coffee ledger." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Coffee, kept." />
+    <meta
+      name="twitter:description"
+      content="A personal coffee ledger — every bag scored black and milk, and what to buy next."
+    />
+    <meta
+      name="twitter:image"
+      content="https://coffeepeeman.sambitsahoo.com/og.png"
+    />
+    <meta
+      name="twitter:image:alt"
+      content="Coffee, kept. — a personal coffee ledger."
+    />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="/styles.css" />
   </head>
@@ -72,7 +106,7 @@
             <li class="bag">
               <div class="bag-head">
                 <div>
-                  <h3 x-text="displayName(bag.name)"></h3>
+                  <h2 x-text="displayName(bag.name)"></h2>
                   <p class="roaster" x-text="bag.roaster"></p>
                 </div>
                 <span class="price" x-text="priceLabel(bag)"></span>
@@ -246,56 +280,103 @@
       </section>
 
       <section x-show="view === 'next'">
-        <div class="picks-toolbar">
-          <span class="toolbar-label">Show</span>
-          <div
-            class="segmented"
-            role="group"
-            aria-label="Number of suggestions"
-          >
-            <template x-for="option in countOptions" :key="option">
-              <button
-                type="button"
-                x-text="option"
-                :aria-pressed="count === option"
-                @click="count = option; setCount()"
-              ></button>
-            </template>
-          </div>
+        <div class="next-head">
+          <h2>What to buy next</h2>
+          <p
+            x-text="'Built from ' + bags.length + ' bags · ' + mixSummary"
+          ></p>
         </div>
 
-        <div class="picks">
-          <template x-for="(pick, index) in picks" :key="pick.coffee.id">
-            <article class="pick">
-              <div class="pick-head">
-                <div class="kind" x-text="pick.kind"></div>
-                <span class="chip" x-show="pick.isNewRoaster">New roaster</span>
-              </div>
-              <h3 x-text="displayName(pick.coffee.name)"></h3>
-              <p class="roaster" x-text="pick.coffee.roaster"></p>
-              <div class="numbers">
-                <div>
-                  <strong x-text="'₹' + Math.round(pick.coffee.per100)"></strong
-                  >per 100g
-                </div>
-                <div><strong x-text="pick.coffee.roast"></strong>roast</div>
-                <div>
-                  <strong x-text="'₹' + pick.coffee.price"></strong>
-                  <span x-text="'per ' + pick.coffee.grams + 'g'"></span>
-                </div>
-              </div>
-              <p class="why" x-text="reason(pick, index)"></p>
-              <a
-                :href="pick.coffee.url"
-                target="_blank"
-                rel="noopener"
-                x-show="pick.coffee.url"
-              >
-                Open bag →
-              </a>
-            </article>
-          </template>
+        <div class="next-controls">
+          <div class="control">
+            <span class="control-label" id="picks-label">Picks</span>
+            <div
+              class="segmented"
+              role="group"
+              aria-labelledby="picks-label"
+            >
+              <template x-for="option in countOptions" :key="option">
+                <button
+                  type="button"
+                  x-text="option"
+                  :aria-pressed="count === option"
+                  @click="count = option; setCount()"
+                ></button>
+              </template>
+            </div>
+          </div>
+
+          <div class="control control-grow">
+            <label class="control-label" for="adventure"
+              >Try new things</label
+            >
+            <div class="range-row">
+              <span class="range-end">Comfort</span>
+              <input
+                id="adventure"
+                class="adventure"
+                type="range"
+                min="0"
+                max="100"
+                step="5"
+                x-model.number="adventure"
+                @change="setAdventure()"
+                :aria-valuetext="adventure + ' out of 100'"
+              />
+              <span class="range-end">Explore</span>
+              <span class="adventure-value" x-text="adventure"></span>
+            </div>
+          </div>
+
+          <button class="ghost shuffle" type="button" @click="shuffle()">
+            Shuffle
+          </button>
         </div>
+
+        <template x-for="group in groupedPicks" :key="group.kind">
+          <section class="pick-group">
+            <div class="group-head">
+              <h3 x-text="group.title"></h3>
+              <p x-text="group.note"></p>
+            </div>
+
+            <div class="picks">
+              <template x-for="pick in group.picks" :key="pick.coffee.id">
+                <article class="pick">
+                  <h4 x-text="displayName(pick.coffee.name)"></h4>
+                  <p class="roaster">
+                    <span x-text="pick.coffee.roaster"></span>
+                  </p>
+
+                  <p class="pick-meta">
+                    <span
+                      ><strong
+                        x-text="'₹' + Math.round(pick.coffee.per100)"
+                      ></strong
+                      >/100g</span
+                    >
+                    <span x-text="pick.coffee.roast + ' roast'"></span>
+                    <span
+                      x-show="pick.coffee.price && pick.coffee.grams !== 100"
+                      ><strong x-text="'₹' + pick.coffee.price"></strong
+                      ><span x-text="'/' + pick.coffee.grams + 'g'"></span
+                    ></span>
+                  </p>
+
+                  <p class="why" x-text="reason(pick)"></p>
+                  <a
+                    :href="pick.coffee.url"
+                    target="_blank"
+                    rel="noopener"
+                    x-show="pick.coffee.url"
+                  >
+                    Open bag →
+                  </a>
+                </article>
+              </template>
+            </div>
+          </section>
+        </template>
 
         <p class="empty" x-show="!picks.length">
           Rate a few bags first — two scores per bag is enough.
